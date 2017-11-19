@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DataPath='../dataset/sample.json'
-OutputPath='shell_output'
+OutputPath='yelp_review'
 
 #python3 text_clean.py $DataPath $OutputPath
 python3 filter_data.py $OutputPath/TC_saveFolder/wordlists.list $OutputPath/clusters.csv
