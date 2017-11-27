@@ -234,7 +234,7 @@ def get_bagOfCentroids(reviews, word_centroid_map):
 def load_file(filePath):
     # file = pd.read_csv()
     fname, ext = os.path.splitext(filePath)
-    print (ext)
+    #print (ext)
 
     dictionary = {}
     if ext == '.json':
