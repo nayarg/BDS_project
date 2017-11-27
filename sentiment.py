@@ -140,7 +140,7 @@ with open('business.json', 'r') as bus_names:
 #print name_score_dict
 #print name_index_dict
 
-with open('business_scores_test.csv', 'wb') as f:
+with open('business_scores_subset.csv', 'wb') as f:
 	w = csv.writer(f)
 	w.writerow(['Business Name', 'Health Score', 'Health Index'])
 	for key, value in name_score_dict.items():
