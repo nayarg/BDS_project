@@ -480,6 +480,8 @@ if __name__ == "__main__":
     verbose = args.verbose
     input_file = args.input_file
 
+    start_time = time.time() #time in seconds
+
     mkdir(output_dir)
     if save:
         mkdir(join(output_dir, save_dir))
@@ -543,3 +545,6 @@ if __name__ == "__main__":
     bag_of_centroids = get_BOC(ids, wordlists, cluster_map, saveAs=join(output_dir, 'bag_of_centroids.dict'))
     if verbose:
         newprint("Shape of bag of centroids: {}:{}".format(len(bag_of_centroids), len(bag_of_centroids[ids[0]])))
+
+    total_time = (time.time() - start_time) 
+    print('Text Clean Runtime: ' + str(total_time))
