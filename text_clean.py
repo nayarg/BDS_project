@@ -547,4 +547,4 @@ if __name__ == "__main__":
         newprint("Shape of bag of centroids: {}:{}".format(len(bag_of_centroids), len(bag_of_centroids[ids[0]])))
 
     total_time = (time.time() - start_time) 
-    print('Text Clean Runtime: ' + str(total_time))
+    print('Text Clean Runtime (s): ' + str(total_time))

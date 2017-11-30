@@ -4,6 +4,7 @@ import pickle
 import argparse
 import csv
 import ujson
+import time
 
 """
 Reads in clusters.csv files
@@ -95,4 +96,8 @@ if __name__ == "__main__":
     data = args.wordlistsDir
     cluster = args.clusterDir
 
+    start_time = time.time() #time in seconds
+    
     main(data, cluster)
+
+    print('Filter Data Runtime (s): ' + str(total_time))

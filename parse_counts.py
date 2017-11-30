@@ -6,6 +6,7 @@ import ujson
 import warnings
 import matplotlib.pyplot as plt
 import json
+import time
 
 warnings.simplefilter("ignore")
 
@@ -96,6 +97,9 @@ def plot_histograms(data, title):
 if __name__ == "__main__":
 
     args = parse_arguments()
+    
+    start_time = time.time() #time in seconds
+
     cluster = args.cluster
     counts = args.counts
     title = args.title
@@ -103,4 +107,8 @@ if __name__ == "__main__":
     inputData = args.master_data_file
     percentage = args.percent
     list_hist = relevant_data(cluster, counts, dataName, inputData, percentage)
+
+    total_time = (time.time() - start_time) 
+    print('Parse Counts Runtime (s): ' + str(total_time))    
+
     plot_histograms(list_hist, title)
