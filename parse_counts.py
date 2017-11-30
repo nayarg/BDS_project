@@ -20,13 +20,13 @@ def parse_arguments():
     parser.add_argument('title', type=str, default='')
     parser.add_argument('data_file', type=str, default='')
     parser.add_argument('master_data_file', type=str, default='')
-
+    parser.add_argument('percent', type=str, default='')
     args = parser.parse_args()
 
     return args
 
 
-def relevant_data(clusterFile, countFile, dataName, filePath):
+def relevant_data(clusterFile, countFile, dataName, filePath, percentage):
     """
     :param clusterFile: cluster.csv
     :param countFile: clusters_freq_count.counts
@@ -37,6 +37,7 @@ def relevant_data(clusterFile, countFile, dataName, filePath):
         for line in data_file:
             data.append(json.loads(line))
 
+    percent = float(percentage)
 
     count = ujson.loads(open(countFile).read())
     cluster = pd.read_csv(clusterFile, header=None, delimiter=",", usecols=[0])
@@ -59,7 +60,7 @@ def relevant_data(clusterFile, countFile, dataName, filePath):
     # [0:(int)(len(cluster_relevance_all)*.25)]
     new_cluster_relevance_all=[(k,cluster_relevance_all[k]) for k in sorted(cluster_relevance_all, key=cluster_relevance_all.get,reverse=True)]
     idx=0
-    new_cluster_relevance_all=new_cluster_relevance_all[0:(int)(len(cluster_relevance_all)*.25)]
+    new_cluster_relevance_all=new_cluster_relevance_all[0:(int)(len(cluster_relevance_all)*percent)]
     
     top_reviewid_rel_pairs={}
     out={}
@@ -100,6 +101,6 @@ if __name__ == "__main__":
     title = args.title
     dataName = args.data_file
     inputData = args.master_data_file
-
-    list_hist = relevant_data(cluster, counts, dataName, inputData)
+    percentage = args.percent
+    list_hist = relevant_data(cluster, counts, dataName, inputData, percentage)
     plot_histograms(list_hist, title)
