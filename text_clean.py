@@ -39,6 +39,8 @@ def parse_arguments():
                                                  "This program takes as input a csv,tsv, or json file and outputs stuff.")
     parser.add_argument('input_file', type=str, default=input_file)
     parser.add_argument('output_dir', type=str, default=output_dir)
+    parser.add_argument('num_clusters', type=int, default=100)
+
     parser.add_argument('--save', '-s', action='store_true', default=True,
                         help='saves intermediary files to save_dir')
     parser.add_argument('--load', '-l', action='store_true', default=True,
@@ -370,7 +372,7 @@ def get_WordVecs(sentences, saveAs='', pretrained=False):
     return dictionary
 
 
-def get_Clusters(word_vectors, saveAs='', n_clusters=100):
+def get_Clusters(word_vectors, n_clusters, saveAs=''):
     skip_Kmeans = False
     skip_wcm = False
     if load:
@@ -472,6 +474,7 @@ def get_BOC(ids, wordlists, word_centroid_map, saveAs=''):
 if __name__ == "__main__":
     args = parse_arguments()
     output_dir = args.output_dir
+    num_clusters = args.num_clusters
     save = args.save
     load = args.load
     verbose = args.verbose
@@ -530,7 +533,7 @@ if __name__ == "__main__":
     # Calculates word clusters using KMeans
     # Output: dict {word:cluster}, saveFile: '<output_dir>/<save_dir>/cluster_map.dict'
     # Note: clusters are saved by default in '<output_dir>/clusters.csv'
-    cluster_map = get_Clusters(word_vectors, saveAs=join(output_dir, save_dir, 'cluster_map.dict'))
+    cluster_map = get_Clusters(word_vectors, num_clusters, saveAs=join(output_dir, save_dir, 'cluster_map.dict'))
     if verbose:
         newprint("Length of cluster_map: {}".format(len(cluster_map)))
 
