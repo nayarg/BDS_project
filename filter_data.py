@@ -100,4 +100,5 @@ if __name__ == "__main__":
     
     main(data, cluster)
 
+    total_time = (time.time() - start_time) 
     print('Filter Data Runtime (s): ' + str(total_time))
