@@ -1,4 +1,5 @@
 import os
+from os.path import join
 import pandas as pd
 import numpy as np
 import argparse
@@ -10,38 +11,44 @@ import time
 
 warnings.simplefilter("ignore")
 
-""" CALCULATES RELVANCY FOR EACH SUBMISSION & PLOTS RELEVANCY HISTOGRAM """ 
-""" ONLY OUTPUTS TOP 25% RELEVANT REVIEW_ID:RELEVANCY PAIRS """
+plot = False
+
+"""   
+Reads in data.json
+Reads in clusters.csv
+Reads in clusters_freq_count.counts
+
+Outputs _final.json for sentiment of top X*100% reviews
+
+Run:
+python3 parse_counts.py "output" "dataset/sample.json" .35
+
+If plot wanted:
+python3 parse_counts.py "output" "dataset/sample.json" .35 --plot
+"""
 
 def parse_arguments():
 
-    parser = argparse.ArgumentParser(description="reads in .counts files")
-    parser.add_argument('cluster', type=str, default='')
-    parser.add_argument('counts', type=str, default='')
-    parser.add_argument('title', type=str, default='')
+    parser = argparse.ArgumentParser(description="Input, data directories and top review percentage (.xx)")
+    parser.add_argument('input_file', type=str, default='')
     parser.add_argument('data_file', type=str, default='')
-    parser.add_argument('master_data_file', type=str, default='')
     parser.add_argument('percent', type=str, default='')
+    parser.add_argument('--plot', action='store_true', default=False)
     args = parser.parse_args()
 
     return args
 
 
-def relevant_data(clusterFile, countFile, dataName, filePath, percentage):
-    """
-    :param clusterFile: cluster.csv
-    :param countFile: clusters_freq_count.counts
-    :return: list of relevant ids
-    """
+def relevant_data(input_file, data_file, percentage):
     data = []
-    with open(filePath) as data_file:
+    with open(data_file) as data_file:
         for line in data_file:
             data.append(json.loads(line))
 
     percent = float(percentage)
 
-    count = ujson.loads(open(countFile).read())
-    cluster = pd.read_csv(clusterFile, header=None, delimiter=",", usecols=[0])
+    count = ujson.loads(open(join(input_file,'clusters_freq_count.counts')).read())
+    cluster = pd.read_csv(join(input_file,'clusters.csv'), header=None, delimiter=",", usecols=[0])
     clusterlist = cluster[0].tolist()
     clusters_score = np.array(clusterlist)
 
@@ -56,9 +63,6 @@ def relevant_data(clusterFile, countFile, dataName, filePath, percentage):
         cluster_relevance_all[id] = sum_rel
         list_hist.append(sum_rel)
 
-    #print(len(cluster_relevance_all))
-    #print((cluster_relevance_all))
-    # [0:(int)(len(cluster_relevance_all)*.25)]
     new_cluster_relevance_all=[(k,cluster_relevance_all[k]) for k in sorted(cluster_relevance_all, key=cluster_relevance_all.get,reverse=True)]
     idx=0
     new_cluster_relevance_all=new_cluster_relevance_all[0:(int)(len(cluster_relevance_all)*percent)]
@@ -75,21 +79,17 @@ def relevant_data(clusterFile, countFile, dataName, filePath, percentage):
                 out[k] = {}
                 out[k][bus] = text
                 break
-##    print(len(out))
 
+    # KEY IS REVIEW ID, SUBKEY IS BUSINESS ID
+    ujson.dump(out, open(join(input_file,'final_output.json'), 'w'))
 
-    ############################ KEY IS REVIEW ID #################################
-
-    ujson.dump(top_reviewid_rel_pairs, open(os.path.join(os.path.dirname(countFile) + '/' + dataName + '_rel.json'), 'w'))
-    ujson.dump(out, open(os.path.join(os.path.dirname(countFile) + '/' + dataName + '_final_output.json'), 'w'))
     return list_hist
 
 
-def plot_histograms(data, title):
-
+def plot_histograms(data, percentage):
     val = np.array(data)
     plt.hist(val, [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
-    plt.title(title)
+    plt.title('Top ' + str(percentage)[1:] + '% Reviews')
     plt.xlabel('Percent Relevant')
     plt.ylabel('Count')
     plt.show()
@@ -100,15 +100,16 @@ if __name__ == "__main__":
     
     start_time = time.time() #time in seconds
 
-    cluster = args.cluster
-    counts = args.counts
-    title = args.title
-    dataName = args.data_file
-    inputData = args.master_data_file
+    input_file = args.input_file
+    data_file = args.data_file
     percentage = args.percent
-    list_hist = relevant_data(cluster, counts, dataName, inputData, percentage)
+    plot =args.plot
+
+
+    list_hist = relevant_data(input_file, data_file, percentage)
 
     total_time = (time.time() - start_time) 
-    print('Parse Counts Runtime (s): ' + str(total_time))    
+    print('Parse Counts Runtime (s): ' + str(total_time))   
 
-    plot_histograms(list_hist, title)
+    if plot:
+        plot_histograms(list_hist, percentage)

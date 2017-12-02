@@ -1,4 +1,5 @@
 import os
+from os.path import join
 import numpy as np
 import pickle
 import argparse
@@ -8,21 +9,21 @@ import time
 
 """
 Reads in clusters.csv files
-Reads in original data file(s)
-Searches each cluster of words & determines cluster word count for each sentences
+Reads in wordlists.list
 
-RUN:
+Searches each cluster of words & determines cluster word count for each sentence
 
-python filter_data.py "path/wordlists.list" "path/clusters.csv"
+Outputs clusters_freq_count.counts
 
-e.g. "../output-india-twitter/TC_saveFolder/wordlists.list" "../output-india-twitter/clusters.csv"
+
+Run:
+python3 filter_data.py "output"
+
 """
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="Determines relevancy of tweets & reddit comments input \n"
-                                                 "Creates cluster association lists for each input")
-    parser.add_argument('wordlistsDir', type=str, default='')
-    parser.add_argument('clusterDir', type=str)
+    parser = argparse.ArgumentParser(description="Determines cluster word count for each sentence")
+    parser.add_argument('input_file', type=str, default='')    
     args = parser.parse_args()
 
     return args
@@ -48,23 +49,17 @@ def load_cluster(clusterFile):
     return clusters
 
 
-def main(dataFile, clusterFile):
-    """
-    :param dataFile: wordlists.list (output of text_clean.py - must have associated IDs)
-    :param clusterFile: clusters.csv (output of text_clean.py)
-    :return: clusters_freq_count.counts
-    """
-    print("loading files ...")
-    clusters = load_cluster(clusterFile)
-    wordlist = None
-    if os.path.splitext(dataFile)[-1] == '.list':
-        wordlist = pickle.load(open(dataFile, 'rb'))
+def main(input_file):
+    clusters = load_cluster(join(input_file,'clusters.csv'))
+
+    wordlist = pickle.load(open(join(input_file,'wordlists.list'), 'rb'))
 
     assert (isinstance(wordlist, dict))  # needs to be dict keyed with ids
-    print("loaded files")
+    print("Loaded prior output files for Filter Data")
     num = len(wordlist)
-    print("data has {} sentences".format(num))
-    print("begin count")
+    print("Data has {} sentences".format(num))
+
+    print("Begin counting review words in cluster...")
     num_clusters = len(clusters)
 
     final_counts = {}
@@ -86,19 +81,19 @@ def main(dataFile, clusterFile):
 
         final_counts[post_id] = cluster_word_count
 
-    print("100% complete - writing output file ... ")
-    ujson.dump(final_counts, open(os.path.join(os.path.dirname(clusterFile), 'clusters_freq_count.counts'), 'w'))
-    print("complete")
+    print("Writing freq_counts output file ... ")
+    ujson.dump(final_counts, open(join(input_file, 'clusters_freq_count.counts'), 'w'))
+
 
 
 if __name__ == "__main__":
     args = parse_arguments()
-    data = args.wordlistsDir
-    cluster = args.clusterDir
+    input_file = args.input_file
 
     start_time = time.time() #time in seconds
     
-    main(data, cluster)
+    main(input_file)
 
     total_time = (time.time() - start_time) 
     print('Filter Data Runtime (s): ' + str(total_time))
+    print("Filter Data Complete \n")
